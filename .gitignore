@@ -1,3 +1,14 @@
 .DS_Store
 **/.DS_Store
 
+# Ambientes e Senhas
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Volumes do Docker (caso sejam criados localmente no futuro)
+grafana_data/
+prometheus_data/
