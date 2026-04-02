@@ -15,4 +15,8 @@ COPY . .
 EXPOSE 5000
 
 # Command to run the Flask application
-CMD ["python", "app.py"]
+CMD ["opentelemetry-instrument", \
+     "--traces_exporter", "none", \
+     "--metrics_exporter", "otlp", \
+     "--logs_exporter", "none", \
+     "python", "app.py"]

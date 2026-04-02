@@ -5,6 +5,9 @@ from random import randint
 from flask import Flask, jsonify
 from prometheus_flask_exporter import PrometheusMetrics
 
+from opentelemetry.instrumentation.flask import FlaskInstrumentor
+from opentelemetry.instrumentation.logging import LoggingInstrumentor
+
 
 APP_NAME = "dice-api"
 
@@ -15,6 +18,9 @@ def create_app() -> Flask:
     app.config["JSON_SORT_KEYS"] = False
 
     configure_logging(app)
+
+    FlaskInstrumentor().instrument_app(app) # fazer a configuração da capturar das métricas (Response-time, Throughput, Error rate)
+
 
     # Prometheus com label padrão
     metrics = PrometheusMetrics(
@@ -37,6 +43,10 @@ def create_app() -> Flask:
 
 
 def configure_logging(app: Flask) -> None:
+
+    LoggingInstrumentor().instrument(set_logging_format=True) # caputar os trace_id e span_id
+    
+
     logging.basicConfig(
         level=os.getenv("LOG_LEVEL", "INFO"),
         format="%(asctime)s %(levelname)s %(name)s %(message)s",
@@ -67,6 +77,15 @@ def register_routes(app: Flask) -> None:
     @app.route("/fail", methods=["GET"])
     def fail():
         raise RuntimeError("Intentional failure")
+    
+    @app.route("/business", methods=["GET"])
+    def business():
+        return jsonify(
+            {
+                "status": "Unauthorized ",
+                "message": "Unauthorized ",
+            }
+        ), 401
 
 
 def register_error_handlers(app: Flask) -> None:
