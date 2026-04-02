@@ -8,6 +8,9 @@ services:
       context: build
     ports:
       - 5000:5000      
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+      - OTEL_SERVICE_NAME=dice-api
     restart: unless-stopped 
     networks:
        observability:
@@ -78,6 +81,21 @@ services:
     restart: unless-stopped
     networks:
        observability:
+
+  otel-collector:
+    image: otel/opentelemetry-collector:0.115.0
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ../otel/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+      - "8889:8889"
+    restart: unless-stopped 
+    networks:
+       observability:
+
+    
 
 networks:
   observability:
