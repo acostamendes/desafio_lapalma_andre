@@ -1,5 +1,6 @@
 import os
 import logging
+import time
 from random import randint
 
 from flask import Flask, jsonify
@@ -7,9 +8,11 @@ from prometheus_flask_exporter import PrometheusMetrics
 
 from opentelemetry.instrumentation.flask import FlaskInstrumentor
 from opentelemetry.instrumentation.logging import LoggingInstrumentor
+from opentelemetry import metrics
 
 
 APP_NAME = "dice-api"
+
 
 
 def create_app() -> Flask:
@@ -86,7 +89,24 @@ def register_routes(app: Flask) -> None:
                 "message": "Unauthorized ",
             }
         ), 401
-
+    
+    @app.route("/latest", methods=["GET"])
+    def latest():
+        delay_seconds = randint(10, 1500) / 1000.0
+        time.sleep(delay_seconds)
+        
+        app.logger.info(
+            "Slow request processed", 
+            extra={"delay_seconds": delay_seconds, "app": APP_NAME}
+        )
+        return jsonify(
+            {
+                "status": "success",
+                "message": f"Simulated latency of {delay_seconds} seconds",
+                "app": APP_NAME
+            }
+        ), 200
+    
 
 def register_error_handlers(app: Flask) -> None:
     @app.errorhandler(Exception)
