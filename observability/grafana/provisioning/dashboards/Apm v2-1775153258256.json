@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 0,
+  "id": 6,
   "links": [],
   "panels": [
     {
@@ -54,11 +54,12 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 6,
+        "w": 4,
         "x": 0,
         "y": 0
       },
       "id": 9,
+      "interval": "1m",
       "options": {
         "minVizHeight": 75,
         "minVizWidth": 75,
@@ -78,13 +79,81 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum(rate(http_server_duration_milliseconds_count{exported_job=\"dice-api\", http_status_code=~\"2..\"}[5m])) \r\n/ \r\nsum(rate(http_server_duration_milliseconds_count{exported_job=\"dice-api\"}[5m])) * 100",
+          "expr": "sum(rate(http_server_duration_milliseconds_count{exported_job=\"dice-api\", http_status_code=~\"2..\"}[2m])) \r\n/ \r\nsum(rate(http_server_duration_milliseconds_count{exported_job=\"dice-api\"}[2m])) * 100 or vector(0)",
           "legendFormat": "Taxa de sucesso",
           "range": true,
           "refId": "A"
         }
       ],
       "title": "Disponibilidade",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "neutral": 2
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 85
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 4,
+        "x": 4,
+        "y": 0
+      },
+      "id": 18,
+      "interval": "1m",
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "sum(rate(http_server_duration_milliseconds_count{http_status_code=~\"5..\", job=\"otel-collector\"}[1h])) \r\n/ \r\n(sum(rate(http_server_duration_milliseconds_count{job=\"otel-collector\"}[1h])) * 0.05)",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Error Budget",
       "type": "gauge"
     },
     {
@@ -107,86 +176,22 @@
               },
               {
                 "color": "red",
-                "value": 80
+                "value": 1000
               }
             ]
           },
-          "unit": "s"
+          "unit": "ms"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 4,
-        "w": 2,
-        "x": 6,
-        "y": 0
-      },
-      "id": 13,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "histogram_quantile(0.95, sum(rate(http_server_duration_milliseconds_bucket{job=\"otel-collector\"}[4m])) by (le))",
-          "legendFormat": "response-time",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Response-time P95",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "s"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
         "w": 4,
         "x": 8,
         "y": 0
       },
-      "id": 11,
+      "id": 13,
+      "interval": "1m",
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -208,13 +213,13 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum(increase(http_server_duration_milliseconds_sum{exported_job=\"dice-api\"}[2m])) / (sum(increase(http_server_duration_milliseconds_count{exported_job=\"dice-api\"}[2m])))",
+          "expr": "histogram_quantile(0.95, sum(rate(http_server_duration_milliseconds_bucket{job=\"otel-collector\"}[2m])) by (le)) or vector(0)",
           "legendFormat": "response-time",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Response-time",
+      "title": "P95",
       "type": "stat"
     },
     {
@@ -250,11 +255,12 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 6,
+        "w": 4,
         "x": 12,
         "y": 0
       },
       "id": 10,
+      "interval": "1m",
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -276,7 +282,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum(increase(http_server_duration_milliseconds_count{ exported_job=\"dice-api\"}[2m])) ",
+          "expr": "sum(increase(http_server_duration_milliseconds_count{ exported_job=\"dice-api\"}[2m])) or vector(0)",
           "legendFormat": "Resq/min",
           "range": true,
           "refId": "A"
@@ -305,21 +311,88 @@
               },
               {
                 "color": "red",
-                "value": 80
+                "value": 200
               }
             ]
           },
-          "unit": "percent"
+          "unit": "ms"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 8,
-        "w": 6,
-        "x": 18,
+        "w": 4,
+        "x": 16,
+        "y": 0
+      },
+      "id": 11,
+      "interval": "1m",
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "sum(increase(http_server_duration_milliseconds_sum{exported_job=\"dice-api\"}[2m])) / (sum(increase(http_server_duration_milliseconds_count{exported_job=\"dice-api\"}[2m]))) or vector (0)",
+          "legendFormat": "response-time",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Response-time",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 4,
+        "x": 20,
         "y": 0
       },
       "id": 12,
+      "interval": "1m",
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -376,21 +449,22 @@
               },
               {
                 "color": "red",
-                "value": 80
+                "value": 3000
               }
             ]
           },
-          "unit": "s"
+          "unit": "ms"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 4,
-        "w": 2,
-        "x": 6,
+        "w": 4,
+        "x": 8,
         "y": 4
       },
       "id": 14,
+      "interval": "1m",
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -412,14 +486,114 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "histogram_quantile(0.99, sum(rate(http_server_duration_milliseconds_bucket{job=\"otel-collector\"}[5m])) by (le))",
+          "expr": "histogram_quantile(0.99, sum(rate(http_server_duration_milliseconds_bucket{job=\"otel-collector\"}[2m])) by (le)) or vector(0)",
           "legendFormat": "response-time",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Response-time P99",
+      "title": "P99",
       "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-GrYlRd",
+            "seriesBy": "min"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "axisSoftMax": 1,
+            "axisSoftMin": 0,
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "max": 0,
+          "min": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 0.5
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 8
+      },
+      "id": 16,
+      "interval": "1m",
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "(\r\n    sum(rate(http_server_duration_milliseconds_bucket{exported_job=\"dice-api\", le=\"500.0\", http_status_code!~\"5..\"}[2m]))\r\n  + \r\n  sum(rate(http_server_duration_milliseconds_bucket{exported_job=\"dice-api\", le=\"2500.0\", http_status_code!~\"5..\"}[2m]))\r\n  )\r\n  / 2 / \r\n  sum(rate(http_server_duration_milliseconds_count{exported_job=\"dice-api\"}[2m]))",
+          "legendFormat": "Apdex",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Apdex",
+      "type": "timeseries"
     },
     {
       "datasource": {
@@ -485,10 +659,12 @@
       "gridPos": {
         "h": 8,
         "w": 8,
-        "x": 0,
+        "x": 8,
         "y": 8
       },
       "id": 2,
+      "interval": "1m",
+      "maxDataPoints": 43200,
       "options": {
         "legend": {
           "calcs": [],
@@ -506,7 +682,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum(increase(http_server_duration_milliseconds_count{ exported_job=\"dice-api\"}[2m])) ",
+          "expr": "sum(increase(http_server_duration_milliseconds_count{ exported_job=\"dice-api\"}[2m])) or vector(0)",
           "legendFormat": "Resq/min",
           "range": true,
           "refId": "A"
@@ -573,17 +749,18 @@
               }
             ]
           },
-          "unit": "s"
+          "unit": "ms"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 8,
         "w": 8,
-        "x": 8,
+        "x": 16,
         "y": 8
       },
       "id": 1,
+      "interval": "1m",
       "options": {
         "legend": {
           "calcs": [],
@@ -700,11 +877,119 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 8,
-        "x": 16,
-        "y": 8
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "id": 17,
+      "interval": "1m",
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "sum(rate(http_server_duration_milliseconds_count{http_status_code=~\"5..\", job=\"otel-collector\"}[1h])) \r\n/ \r\n(sum(rate(http_server_duration_milliseconds_count{job=\"otel-collector\"}[1h])) * 0.05)",
+          "legendFormat": "Error Budget ",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "",
+          "hide": false,
+          "instant": false,
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "Error Budget (Orçamento de Erro)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 16
       },
       "id": 3,
+      "interval": "1m",
       "options": {
         "legend": {
           "calcs": [],
@@ -812,12 +1097,13 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 9,
-        "w": 11,
+        "h": 8,
+        "w": 8,
         "x": 0,
-        "y": 16
+        "y": 24
       },
-      "id": 4,
+      "id": 8,
+      "interval": "1m",
       "options": {
         "legend": {
           "calcs": [],
@@ -835,13 +1121,13 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum by(http_status_code)(increase(http_server_duration_milliseconds_count{exported_job=\"dice-api\"}[2m])) ",
-          "legendFormat": "{{http_status_code}}",
+          "expr": "sum by(http_status_code,http_target)(increase(http_server_duration_milliseconds_count{exported_job=\"dice-api\"}[2m])) ",
+          "legendFormat": "{{http_status_code}} - {{http_target}}",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Throughput por Status Code",
+      "title": "Throughput por Status Code e endpoint",
       "type": "timeseries"
     },
     {
@@ -906,12 +1192,13 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 9,
-        "w": 13,
-        "x": 11,
-        "y": 16
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 24
       },
-      "id": 8,
+      "id": 15,
+      "interval": "1m",
       "options": {
         "legend": {
           "calcs": [],
@@ -929,13 +1216,108 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum by(http_status_code,http_target)(increase(http_server_duration_milliseconds_count{exported_job=\"dice-api\"}[2m])) ",
-          "legendFormat": "{{http_status_code}} - {{http_target}}",
+          "expr": "sum by(http_target)(rate(http_server_duration_milliseconds_sum[2m])) \r\n/ \r\nsum by(http_target)(rate(http_server_duration_milliseconds_count[2m])) or vector(0)",
+          "legendFormat": "{{http_target}}",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Throughput por Status Code e endpoint",
+      "title": "Response time por rota",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 24
+      },
+      "id": 4,
+      "interval": "1m",
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "sum by(http_status_code)(increase(http_server_duration_milliseconds_count{exported_job=\"dice-api\"}[2m])) ",
+          "legendFormat": "{{http_status_code}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Throughput por Status Code",
       "type": "timeseries"
     },
     {
@@ -944,7 +1326,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 25
+        "y": 32
       },
       "id": 7,
       "panels": [],
@@ -1017,9 +1399,10 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 26
+        "y": 33
       },
       "id": 5,
+      "interval": "1m",
       "options": {
         "legend": {
           "calcs": [],
@@ -1111,9 +1494,10 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 26
+        "y": 33
       },
       "id": 6,
+      "interval": "1m",
       "options": {
         "legend": {
           "calcs": [],
@@ -1135,6 +1519,19 @@
           "legendFormat": "CPU",
           "range": true,
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "editorMode": "code",
+          "expr": "rate(container_cpu_user_seconds_total{image=\"server\"}[2m])",
+          "hide": true,
+          "instant": false,
+          "legendFormat": "Teste",
+          "range": true,
+          "refId": "B"
         }
       ],
       "title": "Uso de CPU",
@@ -1149,12 +1546,12 @@
     "list": []
   },
   "time": {
-    "from": "now-30m",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
   "title": "Apm v2",
   "uid": "c2f1ca12-d442-40ca-b57e-e3c9b30d0f02",
-  "version": 13
+  "version": 38
 }
