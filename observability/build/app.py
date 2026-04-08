@@ -6,6 +6,7 @@ from random import randint
 
 from flask import Flask, jsonify
 from prometheus_flask_exporter import PrometheusMetrics
+from prometheus_client import Counter
 
 from opentelemetry.instrumentation.flask import FlaskInstrumentor
 from opentelemetry.instrumentation.logging import LoggingInstrumentor
@@ -13,6 +14,12 @@ from opentelemetry import metrics
 
 
 APP_NAME = "dice-api"
+
+DICE_ROLL_COUNTER = Counter(
+    "dice_rolls_total",
+    "Total de jogadas de dados por valor",
+    ["value","app"]
+)
 
 
 
@@ -24,7 +31,6 @@ def create_app() -> Flask:
     configure_logging(app)
 
     FlaskInstrumentor().instrument_app(app) # fazer a configuração da capturar das métricas (Response-time, Throughput, Error rate)
-
 
     # Prometheus com label padrão
     metrics = PrometheusMetrics(
@@ -62,6 +68,9 @@ def register_routes(app: Flask) -> None:
     @app.route("/", methods=["GET"])
     def roll_dice():
         dice_value = randint(1, 6)
+
+        DICE_ROLL_COUNTER.labels(value=str(dice_value), app=APP_NAME).inc()
+
         app.logger.info(
             "Dice rolled",
             extra={"dice_value": dice_value, "app": APP_NAME},
