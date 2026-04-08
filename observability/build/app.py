@@ -1,6 +1,7 @@
 import os
 import logging
 import time
+import json
 from random import randint
 
 from flask import Flask, jsonify
@@ -111,14 +112,20 @@ def register_routes(app: Flask) -> None:
 def register_error_handlers(app: Flask) -> None:
     @app.errorhandler(Exception)
     def handle_exception(error):
-        app.logger.exception("Unhandled exception")
-        return jsonify(
-            {
-                "error": "internal_server_error",
-                "app": APP_NAME,
-                "message": str(error),
-            }
-        ), 500
+        log_payload = {
+            "level": "error",
+            "app": APP_NAME,
+            "event": "unhandled_exception",
+            "message": str(error)
+        }
+    
+    # Loga como JSON string
+        app.logger.error(json.dumps(log_payload), exc_info=True)
+
+        return jsonify({
+            "error": "internal_server_error",
+            "message": "Ocorreu um erro interno."
+        }), 500
 
 
 if __name__ == "__main__":

@@ -83,15 +83,24 @@ services:
        observability:
 
   otel-collector:
-    image: otel/opentelemetry-collector:0.115.0
+    image: otel/opentelemetry-collector-contrib:0.114.0
     command: ["--config=/etc/otel-collector-config.yaml"]
     volumes:
-      - ../otel/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+      - ./opentelemetry/otel-collector-config.yaml:/etc/otel-collector-config.yaml
     ports:
       - "4317:4317"
       - "4318:4318"
       - "8889:8889"
     restart: unless-stopped 
+    networks:
+       observability:
+
+  loki:
+    image: grafana/loki:3.7.1
+    container_name: loki
+    ports:
+     - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
     networks:
        observability:
 

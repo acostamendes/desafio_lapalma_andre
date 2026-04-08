@@ -18,5 +18,5 @@ EXPOSE 5000
 CMD ["opentelemetry-instrument", \
      "--traces_exporter", "none", \
      "--metrics_exporter", "otlp", \
-     "--logs_exporter", "none", \
+     "--logs_exporter", "otlp", \
      "python", "app.py"]
